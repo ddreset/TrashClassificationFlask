@@ -1,0 +1,95 @@
+<!doctype html>
+<html>
+<head>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <title>Garbage Classification</title>
+  <style type="text/css">
+    body {
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      background-color: #f5f7f5;
+    }
+    header{
+      display: flex;
+      justify-content: center;
+      font-size: 4rem;
+      color: #4CAF50;
+      position: fixed;
+      width: 100%;
+      height: 6rem;
+      align-items: center;
+      box-shadow: 0rem 0.2rem 0.7rem #4CAF50;
+      background-color: #E9F3E9;
+    }
+    input{
+      width: 80%;
+      margin: 0 auto;
+      display: block;
+      border-radius: 1rem;
+      font-size: 3rem;
+      text-align: center;
+      color: #4caf50;
+      border-color: #4caf50;
+    }
+    button{
+      margin: 1.5rem auto;
+      display: block;
+      padding: 0.5rem 2rem;
+      font-size: 2.5rem;
+      border-radius: 1rem;
+      background-color: #e9f3e9;
+      box-shadow: 0.2rem 0.2rem 0.6rem #4CAF50;
+      border: none;
+    }
+    img{
+      width: 50%;
+      margin: 1rem auto;
+      display: block;
+    }
+    #result{
+      width: 80%;
+      overflow-wrap: break-word;
+      margin: 2rem auto;
+      font-size: 40px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>Trash Recognition</header>
+  <div style="width: 100%;margin: 8rem auto 0;">
+    <input type="text" name="imageURL" placeholder="imageURL">
+    <button id="classify" onclick='classify()'>Classify</button>
+    <img src="" id="image">
+    <div id="result"></div>
+  </div>
+
+  <script type=text/javascript>
+    function classify(){
+      var data={
+          "imageURL":$('input[name="imageURL"]').val()
+       };
+      $("#result").text("wait a moment..")
+      
+      $.ajax({
+          url: '/classify',
+          type: 'POST',
+          dataType: 'json',
+          data: JSON.stringify(data),
+          contentType:"application/json; charset=UTF-8"
+      })
+      .done(function(result) {
+          $("#result").text("Result: "+JSON.stringify(result));
+      })
+      .fail(function(err) {
+          $("#result").text(JSON.stringify(err));
+      })
+      .always(function(info) {
+          $("#image").attr('src',$('input[name="imageURL"]').val());
+      });
+    }
+  </script>
+</body>
+</html>
