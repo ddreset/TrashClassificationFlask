@@ -7,3 +7,10 @@ flask
 # Production Server
 # ----------------------
 gunicorn
+
+# ----------------------
+# Python related
+# ----------------------
+numpy
+tensorflow
+requests
