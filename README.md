@@ -6,7 +6,7 @@ Try this demo [here](https://trash-recognition.herokuapp.com/).
 1. Retained Inception-v3 with [Garbage classification](https://www.kaggle.com/asdasdasasdas/garbage-classification).
 2. Modified TensorFlow example to accept Base64 String.
 3. Added human friendly GUI to read images from url or devices.
-(4. Deployed on Heroku, that's why there are Gemfiles) 
+4. <font color="gray">Deployed on Heroku, that's why there are Gemfiles</font>
 ***
 To run it on windows:
 ```
