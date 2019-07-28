@@ -15,4 +15,3 @@ gunicorn
 numpy
 tensorflow
 requests
-base64
