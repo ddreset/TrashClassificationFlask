@@ -2,7 +2,7 @@
 <html>
 <head>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <title>Garbage Classification</title>
+  <title>Trash Classification</title>
   <style type="text/css">
     body {
       margin: 0;
@@ -53,6 +53,12 @@
       margin: 2rem auto;
       font-size: 40px;
     }
+    .note {
+        text-align: center;
+        color: #4caf50;
+        font-size: 30px;
+        margin-bottom: 20px;
+    }
   </style>
 </head>
 
@@ -60,7 +66,9 @@
 
   <header>Trash Recognition</header>
   <div style="width: 100%;margin: 8rem auto 0;">
-    <input type="text" name="imageURL" placeholder="imageURL">
+    <div class="note">Support image format: png, jpg and jpeg</div>
+    <input type="text" name="imageURL" placeholder="imageURL" id="imageURL">
+    <input type="file" name="imageFile" id="imageFile" value="choose an image" accept="image/png, image/jpeg, image/jpg" onchange="clearTextInput()">
     <button id="classify" onclick='classify()'>Classify</button>
     <img src="" id="image">
     <div id="result"></div>
@@ -68,27 +76,55 @@
 
   <script type=text/javascript>
     function classify(){
-      var data={
+      $("#image").attr('src',null);
+      $("#result").text("wait a moment...")
+
+      imageFile = $('#imageFile')[0].files[0]
+      postRequest = {}
+
+      if ( imageFile != null) {
+        var formData = new FormData();
+        formData.append('image', imageFile);
+        postRequest = {
+          url: '/classify',
+          type: 'POST',
+          data: formData,
+          contentType: false,
+          enctype: 'multipart/form-data',
+          processData: false
+        }
+        clearFileInput()
+      } else {
+        var data={
           "imageURL":$('input[name="imageURL"]').val()
-       };
-      $("#result").text("wait a moment..")
-      
-      $.ajax({
+        };
+        postRequest = {
           url: '/classify',
           type: 'POST',
           dataType: 'json',
           data: JSON.stringify(data),
           contentType:"application/json; charset=UTF-8"
-      })
-      .done(function(result) {
-          $("#result").text("Result: "+JSON.stringify(result));
+        }
+        clearTextInput()
+      }
+      
+      $.ajax(postRequest)
+      .done(function(response) {
+          $("#image").attr('src',response.image);
+          $("#result").text("Result: "+JSON.stringify(response.result));
       })
       .fail(function(err) {
           $("#result").text(JSON.stringify(err));
       })
       .always(function(info) {
-          $("#image").attr('src',$('input[name="imageURL"]').val());
+          
       });
+    }
+    function clearTextInput(){
+      $('#imageURL').val(null)
+    }
+    function clearFileInput(){
+      $('#imageFile').val(null)
     }
   </script>
 </body>

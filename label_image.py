@@ -23,6 +23,8 @@ import numpy as np
 import tensorflow as tf
 import requests
 
+import base64
+
 
 def load_graph(model_file):
   graph = tf.Graph()
@@ -36,7 +38,7 @@ def load_graph(model_file):
   return graph
 
 
-def read_tensor_from_image_file(file_name,
+def read_tensor_from_image_file(file,
                                 input_height=299,
                                 input_width=299,
                                 input_mean=0,
@@ -44,18 +46,22 @@ def read_tensor_from_image_file(file_name,
   input_name = "file_reader"
   output_name = "normalized"
   # file_reader = tf.read_file(file_name, input_name)
-  file_reader = requests.get(file_name).content
-  if file_name.endswith(".png"):
-    image_reader = tf.image.decode_png(
-        file_reader, channels=3, name="png_reader")
-  elif file_name.endswith(".gif"):
-    image_reader = tf.squeeze(
-        tf.image.decode_gif(file_reader, name="gif_reader"))
-  elif file_name.endswith(".bmp"):
-    image_reader = tf.image.decode_bmp(file_reader, name="bmp_reader")
-  else:
-    image_reader = tf.image.decode_jpeg(
-        file_reader, channels=3, name="jpeg_reader")
+  # file_reader = requests.get(file_name).content
+  # if file_name.endswith(".png"):
+  #   image_reader = tf.image.decode_png(
+  #       file_reader, channels=3, name="png_reader")
+  # elif file_name.endswith(".gif"):
+  #   image_reader = tf.squeeze(
+  #       tf.image.decode_gif(file_reader, name="gif_reader"))
+  # elif file_name.endswith(".bmp"):
+  #   image_reader = tf.image.decode_bmp(file_reader, name="bmp_reader")
+  # else:
+  #   image_reader = tf.image.decode_jpeg(
+  #       file_reader, channels=3, name="jpeg_reader")
+
+  #get image from base64 string
+  file_reader = base64.b64decode(file)
+  image_reader = tf.image.decode_image(file_reader, channels=3, name="image_reader")
   float_caster = tf.cast(image_reader, tf.float32)
   dims_expander = tf.expand_dims(float_caster, 0)
   resized = tf.image.resize_bilinear(dims_expander, [input_height, input_width])
@@ -100,7 +106,7 @@ def main(args):
   if args.graph:
     model_file = args.graph
   if args.image:
-    file_name = args.image
+    file = args.image
   if args.labels:
     label_file = args.labels
   if args.input_height:
@@ -118,7 +124,7 @@ def main(args):
 
   graph = load_graph(model_file)
   t = read_tensor_from_image_file(
-      file_name,
+      file,
       input_height=input_height,
       input_width=input_width,
       input_mean=input_mean,
@@ -135,12 +141,13 @@ def main(args):
     })
   results = np.squeeze(results)
 
-  top_k = results.argsort()[-5:][::-1]
+  # top_k = results.argsort()[-5:][::-1]
   labels = load_labels(label_file)
   label_result = np.append(np.array(labels).reshape(-1,1),np.array(results).reshape(-1,1),axis=1)
-  for i in top_k:
-    print(labels[i], results[i])
-  return label_result
+  sorted_label_result = label_result[label_result[:, 1].argsort()[::-1]]
+  # for i in top_k:
+    # print(labels[i], results[i])
+  return sorted_label_result
 
 
 if __name__ == "__main__":
